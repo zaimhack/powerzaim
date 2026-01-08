@@ -2,6 +2,21 @@
 
 PowerZaim は、Zaim CSVを扱うための PowerShell のツール集です。
 
+## Group-PowzAccountTnx.ps1
+
+Zaim CSVに含まれるトランザクションを口座ごとに集計しカウントします。
+
+### 使い方
+
+```PowerShell
+> import-csv .\Zaim.csv | .\Group-PowzAccountTnx.ps1 | Format-Table
+
+Name                        Earliest   Latest     Payment Income TransferFrom TransferTo Balance   Total ForgnCurr
+----                        --------   ------     ------- ------ ------------ ---------- -------   ----- ---------
+BBB銀行                     2022-06-21 2024-11-06      49     41           21          0       2  741702         0
+CCCカード                     2022-04-15 2023-08-04       7      0            0          2       3    1780         0
+```
+
 ## Split-PowzCsv.ps1
 
 Zaim CSV を分割します。
