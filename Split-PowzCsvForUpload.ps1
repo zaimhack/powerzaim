@@ -1,11 +1,12 @@
 <# 
     .SYNOPSIS
-    Splits a Zaim CSV file into multiple files.
+    Splits a Zaim CSV file into multiple files for upload purposes.
 
     .DESCRIPTION
+    Splits a Zaim CSV file into multiple smaller files intended for upload, dividing the data so that each output file stays within the specified size limit.
 
     .Parameter MaxLines
-    This script plits the Zaim CSV so that each output file stays within the number of rows specified by this parameter. The default is 3000.
+    This script splits the Zaim CSV so that each output file stays within the number of rows specified by this parameter. The default is 3000.
 
     .Parameter OutputFolder
     Specifies the path to the output folder. The split CSV files are saved in this folder as 0000.csv, 0001.csv, 0002.csv, and so on. The default is the current folder.
@@ -48,7 +49,6 @@ begin {
             }
         }
     }
-    $DebugPreference = 'Continue'
 }
 
 process {
