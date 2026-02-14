@@ -14,22 +14,23 @@ begin {
         param (
             [string]$acc,
             [string]$date,
-            [string]$txnype,
+            [string]$txntype,
             [string]$curr,
             [int]$diff
         ) 
         process {
             $a = $AccountSummary[$acc]
             if ($null -eq $a) {
-                $a = @{
+                $a = [ordered]@{
                     Name         = $acc;
-                    Latest       = $date;
                     Earliest     = $date;
+                    Latest       = $date;
                     Payment      = 0;
                     Income       = 0;
                     TransferFrom = 0;
                     TransferTo   = 0;
-                    Balance      = 0;
+                    BalancePlus  = 0;
+                    BalanceMinus = 0;
                     Total        = 0;
                     ForgnCurr    = 0;
                 }
@@ -46,13 +47,8 @@ begin {
                 $a.ForgnCurr += 1
             }
 
-            switch ($txnype) {
-                'payment' { $a.Payment += 1; }
-                'income' { $a.Income += 1; }
-                'transfer_from' { $a.TransferFrom += 1; }
-                'transfer_to' { $a.TransferTo += 1; }
-                'balance' { $a.Balance += 1; }
-                Default {}
+            if ($a.Contains($txntype)) {
+                $a.$txntype += 1
             }
 
             $a.Total += $diff
@@ -64,21 +60,21 @@ begin {
 process {
     switch ($p.方法) {
         'payment' {
-            Add-TransactionCount $p.支払元 $p.日付 $p.方法 $p.通貨 (- $p.支出)
+            Add-TransactionCount $p.支払元 $p.日付 'Payment' $p.通貨 (- $p.支出)
         }
         'income' {
-            Add-TransactionCount $p.入金先 $p.日付 $p.方法 $p.通貨 $p.収入
+            Add-TransactionCount $p.入金先 $p.日付 'Income' $p.通貨 $p.収入
         }
         'transfer' {
-            Add-TransactionCount $p.支払元 $p.日付 'transfer_from' $p.通貨 (- $p.振替)
-            Add-TransactionCount $p.入金先 $p.日付 'transfer_to' $p.通貨 $p.振替
+            Add-TransactionCount $p.支払元 $p.日付 'TransferFrom' $p.通貨 (- $p.振替)
+            Add-TransactionCount $p.入金先 $p.日付 'TransferTo' $p.通貨 $p.振替
         }
         'balance' {
             if ($p.支払元 -ne "-") {
-                Add-TransactionCount $p.支払元 $p.日付 $p.方法 $p.通貨 (- $p.残高調整)
+                Add-TransactionCount $p.支払元 $p.日付 'BalancePlus' $p.通貨 (- $p.残高調整)
             }
             else {
-                Add-TransactionCount $p.入金先 $p.日付 $p.方法 $p.通貨 $p.残高調整
+                Add-TransactionCount $p.入金先 $p.日付 'BalanceMinus' $p.通貨 $p.残高調整
             }
         }
         Default {}
@@ -86,18 +82,5 @@ process {
 }
 
 end {
-    $AccountSummary.Values | ForEach-Object {
-        [pscustomobject]@{
-            Name         = $_.Name;
-            Earliest     = $_.Earliest;
-            Latest       = $_.Latest;
-            Payment      = $_.Payment;
-            Income       = $_.Income;
-            TransferFrom = $_.TransferFrom;
-            TransferTo   = $_.TransferTo;
-            Balance      = $_.Balance;
-            Total        = $_.Total;
-            ForgnCurr = $_.ForgnCurr;
-        }
-    }
+    $AccountSummary.Values | ForEach-Object { [PSCustomObject]$_ }
 }
